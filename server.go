@@ -2,18 +2,37 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
-func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("Handling request from %v\n", r.RemoteAddr)
-		fmt.Fprintf(w, "Hello, you've reached %q", html.EscapeString(r.URL.Path))
-	})
+func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	fmt.Fprint(w, "Hello and welcome!")
+}
 
-	err := http.ListenAndServe(":8080", nil)
+func User(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	fmt.Fprintf(w, "user %v", params[0])
+}
+
+func Text(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	fmt.Fprintf(w, "text %v", params[0])
+}
+
+func Channel(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	fmt.Fprintf(w, "channel %v", params[0])
+}
+
+func main() {
+	router := httprouter.New()
+
+	router.GET("/", Index)
+	router.GET("/user/:id", User)
+	router.GET("/text/:id", Text)
+	router.GET("/channel/:id", Channel)
+
+	err := http.ListenAndServe(":8080", router)
 
 	if(err != nil) {
 		log.Fatal("ListenAndServe: ", err)
