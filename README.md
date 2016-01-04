@@ -1,21 +1,81 @@
 # go-restful-api
-serves json over http
-learning go
+
+Entry point is server.go
+
+API spec:
+
+* GET   /users
+* GET   /users/:id
+* POST  /users
+
+TODO:
+* GET   /medias
+* GET   /medias/:id
+* POST  /medias
+* GET   /channels
+* GET   /channels/:id
+* POST  /channels
 
 
+####User
 
-useful
+```json
+{
+  "id": 0,
+  "name": "",
+  "email": "",
+  "created": "2015-01-01T00:00:00Z",
+  "active": true,
+  "hash": "",
+  "salt": ""
+}
+```
+
+####Media
+
+```json
+{
+  "id": 0,
+  "title": "",
+  "content": "",
+  "user": user_id,
+  "channel": channel_id,
+  "created": "2015-01-01T00:00:00Z",
+  "points": 0,
+  "active": true
+}
+```
+
+####Channel
+
+```json
+{
+  "id": 0,
+  "name": "",
+  "created": "2015-01-01T00:00:00Z",
+  "mods": [ user_id ],
+  "users": [ user_id ]
+}
+```
+
+##Notes
+
+###go env setup
 
 export GOPATH=$HOME/Developer/goworkspace
+
 export PATH=$PATH:$GOPATH/bin
 
 
 
-postgres
+###postgres commands
 
 pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start
+
 pg_ctl -D /usr/local/var/postgres stop -s -m fast
 
+
+###postgres table creation
 
 CREATE TABLE users
 (	
