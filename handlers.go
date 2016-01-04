@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"encoding/json"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -14,11 +15,12 @@ func IndexGet(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 func UsersGet(env *Env) httprouter.Handle {
 	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		users, dbErr := AllUsers(env.db)
+		users, dbErr := DalGetAllUsers(env.db)
+		var emptyUser struct{}
 
 		if dbErr != nil {
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, "<h1>404</h1><div>Not Found</div>")
+			json.NewEncoder(w).Encode(emptyUser)
 		} else {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 			w.WriteHeader(http.StatusOK)
@@ -30,25 +32,61 @@ func UsersGet(env *Env) httprouter.Handle {
     })
 }
 
-func UserGet(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func UserGet(env *Env) httprouter.Handle {
+	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		var emptyUser struct{}
+
+		id, err := strconv.Atoi(params[0].Value)
+		if(err != nil) {
+			fmt.Printf("%v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(emptyUser)
+		}
+
+		user, dbErr := DalGetUser(id, env.db)
+
+		if dbErr != nil {
+			fmt.Printf("%v", dbErr)
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(emptyUser)
+		} else {
+			w.WriteHeader(http.StatusOK)
 	
-	users := Users{
-		User{Id: 0, Name: "dan"},
-		User{Id: 1, Name: "ada"},
-		User{Id: 2, Name: "bob"},
-		User{Id: 3, Name: "adam"},
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-
-	if err := json.NewEncoder(w).Encode(users); err != nil {
-       	panic(err)
-    }
+			if err := json.NewEncoder(w).Encode(user); err != nil {
+    	    	panic(err)
+    		}
+    	}
+    })
 }
 
-func UserPost(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func UserPost(env *Env) httprouter.Handle {
+	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		var emptyUser struct{}
 
+		decoder := json.NewDecoder(r.Body)
+    	var user User
+    	err := decoder.Decode(&user)
+    	if err != nil {
+        	w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(emptyUser)
+    	}
+
+		returnUser, dbErr := DalCreateUser(&user, env.db)
+
+		if dbErr != nil {
+			fmt.Printf("%v", dbErr)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(emptyUser)
+		} else {
+			w.WriteHeader(http.StatusCreated)
+	
+			if err := json.NewEncoder(w).Encode(returnUser); err != nil {
+    	    	panic(err)
+    		}
+    	}
+    })
 }
 
 func MediasGet(w http.ResponseWriter, r *http.Request, params httprouter.Params) {

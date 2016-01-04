@@ -9,8 +9,8 @@ type User struct {
 	Name 		string		`json:"name"`
 	Email 		string		`json:"email"`
 	Created 	time.Time 	`json:"created"`
-	Hash		string		`json:"hash"`
-	Salt		string		`json:"salt"`
+	Hash		string		`json:"-"`
+	Salt		string		`json:"-"`
 	Active		bool		`json:"active"`
 }
 

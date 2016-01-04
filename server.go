@@ -32,10 +32,12 @@ func main() {
 	router.GET("/users", UsersGet(env))
 	router.GET("/medias", MediasGet)
 	router.GET("/channels", ChannelsGet)
-
-	router.GET("/users/:id", UserGet)
+	
+	router.GET("/users/:id", UserGet(env))
 	router.GET("/medias/:id", MediaGet)
 	router.GET("/channels/:id", ChannelGet)
+
+	router.POST("/users", UserPost(env))
 
 	loggingRouter := Logger(router)
 
