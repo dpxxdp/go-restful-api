@@ -1,6 +1,13 @@
 # go-restful-api
 
-Entry point is server.go
+#####To build a docker image:
+
+docker build -t go-restful-api .
+
+#####To run out of a container:
+
+docker run --publish 3000:8080 --name restapi --rm go-restful-api
+
 
 API spec:
 
